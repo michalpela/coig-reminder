@@ -7,15 +7,15 @@ const DAYS = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "So"];
 const WEEK_TYPES = {
   standard: {
     label: "Standardowy",
-    days: "Środa i Czwartek",
-    short: "Śr + Cz",
-    remote: [0, 1, 4], // Pn, Wt, Pt
+    days: "Poniedziałek i Wtorek",
+    short: "Pn + Wt",
+    remote: [2, 3, 4], // Śr, Cz, Pt
   },
   friday: {
     label: "Z piątkiem",
-    days: "Czwartek i Piątek",
-    short: "Cz + Pt",
-    remote: [0, 1, 2], //Pn, Wt, Śr,
+    days: "Poniedziałek i Piątek",
+    short: "Wt + Pt",
+    remote: [1, 2, 3], //Wt, Śr, Cz
   },
 };
 
@@ -63,7 +63,7 @@ function selectWeekType(type) {
     .getElementById("optFriday")
     .classList.toggle("active", type === "friday");
   updateNextWeekInfo(type);
-  updateApplicationDates(type); // ← nowe wywołanie
+  updateApplicationDates(type);
 }
 
 function updateNextWeekInfo(currentType) {

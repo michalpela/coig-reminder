@@ -6,16 +6,16 @@ const ALARM_NAME = "coig-reminder-alarm";
 // Treści dla każdego typu tygodnia
 const WEEK_TYPES = {
   standard: {
-    days: "środa i czwartek",
-    short: "Śr + Cz",
+    days: "poniedziałek i wtorek",
+    short: "Pn + Wt",
     next: "friday",
-    remote: [0, 1, 4], // Pn, Wt, Pt
+    remote: [2, 3, 4], // Śr, Cz, Pt
   },
   friday: {
-    days: "czwartek i piątek",
-    short: "Cz + Pt",
+    days: "poniedziałek i piątek",
+    short: "Pn + Pt",
     next: "standard",
-    remote: [0, 1, 2], //Pn, Wt, Śr,
+    remote: [1, 2, 3], //Wt, Śr, Cz
   },
 };
 
