@@ -108,7 +108,7 @@ function sendNotification(todayDate, weekType) {
     type: "basic",
     iconUrl: "icons/icon128.png",
     title: "📋 Czas na wniosek o pracę!",
-    message: `Wypełnij wniosek na ${wt.days} (${wt.short}).\nNastępny tydzień: ${nextWt.short}.`,
+    message: `Wypełnij wniosek na ${wt.days}. \nNastępny tydzień: ${nextWt.short}.`,
     priority: 2,
     requireInteraction: true,
     buttons: [{ title: "Otwórz formularz" }]
