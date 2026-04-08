@@ -5,8 +5,8 @@ const DAYS = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "So"];
 
 // Definicje typów tygodnia
 const WEEK_TYPES = {
-  standard: { label: "Standardowy", days: "Środa i Czwartek", short: "Śr + Cz" },
-  friday: { label: "Z piątkiem", days: "Czwartek i Piątek", short: "Cz + Pt" },
+  standard: { label: "Standardowy", days: "Poniedziałek i Wtorek", short: "Pn + Wt" },
+  friday: { label: "Z piątkiem", days: "Wtorek i Piątek", short: "Wt + Pt" },
 };
 
 function oppositeType(t) {
