@@ -3,7 +3,18 @@ const TARGET_URL = "https://epp.coig.biz/worktime/holidays/add";
 
 const DAYS = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "So"];
 
+// Definicje typów tygodnia
+const WEEK_TYPES = {
+  standard: { label: "Standardowy", days: "Środa i Czwartek", short: "Śr + Cz" },
+  friday: { label: "Z piątkiem", days: "Czwartek i Piątek", short: "Cz + Pt" },
+};
+
+function oppositeType(t) {
+  return t === "standard" ? "friday" : "standard";
+}
+
 let selectedDay = null;
+let selectedWeek = "standard";   // aktualny wybór w UI
 
 /* ── Buduj siatkę dni ─────────────────────────────────────── */
 const grid = document.getElementById("daysGrid");
@@ -25,11 +36,30 @@ function selectDay(idx) {
   });
 }
 
+/* ── Typ tygodnia ─────────────────────────────────────────── */
+document.getElementById("optStandard").addEventListener("click", () => selectWeekType("standard"));
+document.getElementById("optFriday").addEventListener("click", () => selectWeekType("friday"));
+
+function selectWeekType(type) {
+  selectedWeek = type;
+  document.getElementById("optStandard").classList.toggle("active", type === "standard");
+  document.getElementById("optFriday").classList.toggle("active", type === "friday");
+  updateNextWeekInfo(type);
+}
+
+function updateNextWeekInfo(currentType) {
+  const next = WEEK_TYPES[oppositeType(currentType)];
+  document.getElementById("nextWeekText").innerHTML =
+    `Po przypomnieniu automatycznie przełączy się na: <strong>${next.short}</strong>`;
+}
+
 /* ── Wczytaj ustawienia ───────────────────────────────────── */
 chrome.storage.sync.get(
-  { selectedDay: null, lastNotified: null, notifyTime: "09:00" },
+  { selectedDay: null, lastNotified: null, notifyTime: "09:00", nextWeekType: "standard" },
   (data) => {
     document.getElementById("notifyTime").value = data.notifyTime || "09:00";
+
+    selectWeekType(data.nextWeekType || "standard");
 
     if (data.selectedDay !== null && data.selectedDay !== -1) {
       selectDay(data.selectedDay);
@@ -48,16 +78,15 @@ function updateStatus(day, lastNotified) {
     setStatus(false, "Powiadomienia wyłączone");
     return;
   }
-  const dayName  = DAYS[day];
+  const dayName = DAYS[day];
   const todayStr = new Date().toDateString();
-  const done     = lastNotified === todayStr && new Date().getDay() === day;
+  const done = lastNotified === todayStr && new Date().getDay() === day;
 
   if (done) {
     setStatus(true, `✓ Wysłano dziś (${dayName})`);
     return;
   }
 
-  // Pokaż kiedy następny alarm
   chrome.alarms.get("coig-reminder-alarm", (alarm) => {
     if (alarm) {
       const d = new Date(alarm.scheduledTime);
@@ -71,9 +100,9 @@ function updateStatus(day, lastNotified) {
 }
 
 function setStatus(active, text) {
-  const dot  = document.getElementById("dot");
+  const dot = document.getElementById("dot");
   const span = document.getElementById("statusText");
-  dot.className  = "dot " + (active ? "active" : "off");
+  dot.className = "dot " + (active ? "active" : "off");
   span.textContent = text;
 }
 
@@ -84,12 +113,14 @@ document.getElementById("saveBtn").addEventListener("click", () => {
     return;
   }
   const notifyTime = document.getElementById("notifyTime").value || "09:00";
-  chrome.storage.sync.set({ selectedDay, notifyTime, lastNotified: null }, () => {
-    updateStatus(selectedDay, null);
-    showToast("Zapisano ✓");
-    // Zaplanuj alarm na nowo z dokładną godziną
-    chrome.runtime.sendMessage({ action: "reschedule" }).catch(() => {});
-  });
+  chrome.storage.sync.set(
+    { selectedDay, notifyTime, lastNotified: null, nextWeekType: selectedWeek },
+    () => {
+      updateStatus(selectedDay, null);
+      showToast("Zapisano ✓");
+      chrome.runtime.sendMessage({ action: "reschedule" }).catch(() => { });
+    }
+  );
 });
 
 /* ── Wyłącz ───────────────────────────────────────────────── */
