@@ -116,11 +116,13 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   chrome.storage.sync.set(
     { selectedDay, notifyTime, lastNotified: null, nextWeekType: selectedWeek },
     () => {
-      updateStatus(selectedDay, null);
-      showToast("Zapisano ✓");
       chrome.runtime.sendMessage({ action: "reschedule" }).catch(() => { });
     }
   );
+  setTimeout(() => {
+    updateStatus(selectedDay, null);
+    showToast("Zapisano ✓");
+  }, 100);  
 });
 
 /* ── Wyłącz ───────────────────────────────────────────────── */
