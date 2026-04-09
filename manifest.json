@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "COIG – Przypomnienie o wniosku",
-  "version": "1.0-K",
+  "version": "1.0.0",
   "description": "Przypomina o wystawieniu wniosku o pracę w wybrany dzień tygodnia.",
   "permissions": [
     "notifications",

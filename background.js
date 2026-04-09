@@ -11,8 +11,8 @@ const WEEK_TYPES = {
     next: "friday",
   },
   friday: {
-    days: "wtorek i piątek",
-    short: "Wt + Pt",
+    days: "poniedziałek i piątek",
+    short: "Pn + Pt",
     next: "standard",
   },
 };
@@ -41,7 +41,6 @@ function reschedule() {
 
         const when = nextOccurrence(data.selectedDay, data.notifyTime);
         chrome.alarms.create(ALARM_NAME, { when });
-        console.log("[COIG] Alarm zaplanowany na:", new Date(when).toString());
       });
     }
   );
