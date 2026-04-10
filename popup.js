@@ -5,8 +5,18 @@ const DAYS = ["Nd", "Pn", "Wt", "Śr", "Cz", "Pt", "So"];
 
 // Definicje typów tygodnia
 const WEEK_TYPES = {
-  standard: { label: "Standardowy", days: "Środa i Czwartek", short: "Śr + Cz" },
-  friday: { label: "Z piątkiem", days: "Czwartek i Piątek", short: "Cz + Pt" },
+  standard: {
+    label: "Standardowy",
+    days: "Środa i Czwartek",
+    short: "Śr + Cz",
+    remote: [0, 1, 4], // Pn, Wt, Pt
+  },
+  friday: {
+    label: "Z piątkiem",
+    days: "Czwartek i Piątek",
+    short: "Cz + Pt",
+    remote: [0, 1, 2], //Pn, Wt, Śr,
+  },
 };
 
 function oppositeType(t) {
@@ -14,7 +24,7 @@ function oppositeType(t) {
 }
 
 let selectedDay = null;
-let selectedWeek = "standard";   // aktualny wybór w UI
+let selectedWeek = "standard"; // aktualny wybór w UI
 
 /* ── Buduj siatkę dni ─────────────────────────────────────── */
 const grid = document.getElementById("daysGrid");
@@ -37,14 +47,23 @@ function selectDay(idx) {
 }
 
 /* ── Typ tygodnia ─────────────────────────────────────────── */
-document.getElementById("optStandard").addEventListener("click", () => selectWeekType("standard"));
-document.getElementById("optFriday").addEventListener("click", () => selectWeekType("friday"));
+document
+  .getElementById("optStandard")
+  .addEventListener("click", () => selectWeekType("standard"));
+document
+  .getElementById("optFriday")
+  .addEventListener("click", () => selectWeekType("friday"));
 
 function selectWeekType(type) {
   selectedWeek = type;
-  document.getElementById("optStandard").classList.toggle("active", type === "standard");
-  document.getElementById("optFriday").classList.toggle("active", type === "friday");
+  document
+    .getElementById("optStandard")
+    .classList.toggle("active", type === "standard");
+  document
+    .getElementById("optFriday")
+    .classList.toggle("active", type === "friday");
   updateNextWeekInfo(type);
+  updateApplicationDates(type); // ← nowe wywołanie
 }
 
 function updateNextWeekInfo(currentType) {
@@ -55,7 +74,12 @@ function updateNextWeekInfo(currentType) {
 
 /* ── Wczytaj ustawienia ───────────────────────────────────── */
 chrome.storage.sync.get(
-  { selectedDay: null, lastNotified: null, notifyTime: "09:00", nextWeekType: "standard" },
+  {
+    selectedDay: null,
+    lastNotified: null,
+    notifyTime: "09:00",
+    nextWeekType: "standard",
+  },
   (data) => {
     document.getElementById("notifyTime").value = data.notifyTime || "09:00";
 
@@ -69,7 +93,7 @@ chrome.storage.sync.get(
     } else {
       setStatus(false, "Nie skonfigurowano");
     }
-  }
+  },
 );
 
 /* ── Status ───────────────────────────────────────────────── */
@@ -90,8 +114,15 @@ function updateStatus(day, lastNotified) {
   chrome.alarms.get("coig-reminder-alarm", (alarm) => {
     if (alarm) {
       const d = new Date(alarm.scheduledTime);
-      const dateStr = d.toLocaleDateString("pl-PL", { weekday: "long", month: "short", day: "numeric" });
-      const timeStr = d.toLocaleTimeString("pl-PL", { hour: "2-digit", minute: "2-digit" });
+      const dateStr = d.toLocaleDateString("pl-PL", {
+        weekday: "long",
+        month: "short",
+        day: "numeric",
+      });
+      const timeStr = d.toLocaleTimeString("pl-PL", {
+        hour: "2-digit",
+        minute: "2-digit",
+      });
       setStatus(true, `Następne: ${dateStr}, ${timeStr}`);
     } else {
       setStatus(true, `Aktywne – każdy ${dayName}`);
@@ -116,20 +147,22 @@ document.getElementById("saveBtn").addEventListener("click", () => {
   chrome.storage.sync.set(
     { selectedDay, notifyTime, lastNotified: null, nextWeekType: selectedWeek },
     () => {
-      chrome.runtime.sendMessage({ action: "reschedule" }).catch(() => { });
-    }
+      chrome.runtime.sendMessage({ action: "reschedule" }).catch(() => {});
+    },
   );
   setTimeout(() => {
     updateStatus(selectedDay, null);
     showToast("Zapisano ✓");
-  }, 100);  
+  }, 100);
 });
 
 /* ── Wyłącz ───────────────────────────────────────────────── */
 document.getElementById("disableBtn").addEventListener("click", () => {
   chrome.storage.sync.set({ selectedDay: -1, lastNotified: null }, () => {
     selectedDay = null;
-    document.querySelectorAll(".day-btn").forEach(b => b.classList.remove("active"));
+    document
+      .querySelectorAll(".day-btn")
+      .forEach((b) => b.classList.remove("active"));
     setStatus(false, "Powiadomienia wyłączone");
     showToast("Wyłączono", "#f87171");
   });
@@ -148,4 +181,34 @@ function showToast(msg, color = "#34d399") {
   toast.style.color = color === "#34d399" ? "#0a1a12" : "#fff";
   toast.classList.add("show");
   setTimeout(() => toast.classList.remove("show"), 2000);
+}
+
+/* ── Oblicz daty do wypełnienia wniosku ───────────────────── */
+function updateApplicationDates(type) {
+  const now = new Date();
+  const today = now.getDay(); // 0 (Nd) - 6 (So)
+
+  const daysToNextMonday = today === 0 ? 1 : 8 - today;
+
+  const nextMonday = new Date(now);
+  nextMonday.setDate(now.getDate() + daysToNextMonday);
+
+  const fmt = { day: "numeric", month: "long" };
+
+  const activeOffsets = WEEK_TYPES[type].remote;
+
+  const dates = activeOffsets.map((offset) => {
+    const d = new Date(nextMonday);
+    d.setDate(nextMonday.getDate() + offset);
+    return d;
+  });
+
+  const day1 = dates[0].getDate();
+  const day2 = dates[1].getDate();
+  const day3Full = dates[2].toLocaleDateString("pl-PL", fmt);
+
+  const container = document.getElementById("dateInfo");
+  if (container) {
+    container.innerHTML = `Wnioski na przyszły tydzień:<br><strong>${day1}, ${day2}, ${day3Full}</strong>`;
+  }
 }

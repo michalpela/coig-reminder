@@ -1,449 +1,460 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="pl">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>COIG Przypomnienie</title>
+    <style>
+      @import url("https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap");
 
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>COIG Przypomnienie</title>
-  <style>
-    @import url('https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600&family=DM+Mono:wght@400;500&display=swap');
+      :root {
+        --bg: #0f1117;
+        --surface: #1a1d27;
+        --border: #2a2f42;
+        --accent: #4f8ef7;
+        --accent-dim: #1e3a6e;
+        --text: #e8eaf0;
+        --muted: #6b7280;
+        --success: #34d399;
+        --danger: #f87171;
+        --amber: #fbbf24;
+        --amber-dim: #3d2e07;
+        --radius: 10px;
+      }
 
-    :root {
-      --bg: #0f1117;
-      --surface: #1a1d27;
-      --border: #2a2f42;
-      --accent: #4f8ef7;
-      --accent-dim: #1e3a6e;
-      --text: #e8eaf0;
-      --muted: #6b7280;
-      --success: #34d399;
-      --danger: #f87171;
-      --amber: #fbbf24;
-      --amber-dim: #3d2e07;
-      --radius: 10px;
-    }
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-    }
+      body {
+        width: 320px;
+        background: var(--bg);
+        color: var(--text);
+        font-family: "DM Sans", sans-serif;
+        font-size: 14px;
+        padding: 20px;
+        user-select: none;
+      }
 
-    body {
-      width: 320px;
-      background: var(--bg);
-      color: var(--text);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 14px;
-      padding: 20px;
-      user-select: none;
-    }
+      /* ── Header ── */
+      .header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+        padding-bottom: 16px;
+        border-bottom: 1px solid var(--border);
+      }
 
-    /* ── Header ── */
-    .header {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 20px;
-      padding-bottom: 16px;
-      border-bottom: 1px solid var(--border);
-    }
+      .logo {
+        width: 36px;
+        height: 36px;
+        background: linear-gradient(135deg, var(--accent), #7c3aed);
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        flex-shrink: 0;
+      }
 
-    .logo {
-      width: 36px;
-      height: 36px;
-      background: linear-gradient(135deg, var(--accent), #7c3aed);
-      border-radius: 8px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 18px;
-      flex-shrink: 0;
-    }
+      .header-text h1 {
+        font-size: 15px;
+        font-weight: 600;
+        letter-spacing: -0.2px;
+      }
 
-    .header-text h1 {
-      font-size: 15px;
-      font-weight: 600;
-      letter-spacing: -0.2px;
-    }
+      .header-text p {
+        font-size: 11px;
+        color: var(--muted);
+        margin-top: 2px;
+      }
 
-    .header-text p {
-      font-size: 11px;
-      color: var(--muted);
-      margin-top: 2px;
-    }
+      /* ── Status badge ── */
+      .status {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 10px 14px;
+        margin-bottom: 18px;
+        font-size: 12px;
+      }
 
-    /* ── Status badge ── */
-    .status {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 10px 14px;
-      margin-bottom: 18px;
-      font-size: 12px;
-    }
+      .dot {
+        width: 8px;
+        height: 8px;
+        border-radius: 50%;
+        background: var(--muted);
+        flex-shrink: 0;
+        transition: background 0.3s;
+      }
 
-    .dot {
-      width: 8px;
-      height: 8px;
-      border-radius: 50%;
-      background: var(--muted);
-      flex-shrink: 0;
-      transition: background .3s;
-    }
+      .dot.active {
+        background: var(--success);
+        box-shadow: 0 0 6px var(--success);
+      }
 
-    .dot.active {
-      background: var(--success);
-      box-shadow: 0 0 6px var(--success);
-    }
+      .dot.off {
+        background: var(--danger);
+      }
 
-    .dot.off {
-      background: var(--danger);
-    }
+      #statusText {
+        color: var(--muted);
+      }
 
-    #statusText {
-      color: var(--muted);
-    }
+      /* ── Section label ── */
+      .label {
+        font-size: 11px;
+        font-weight: 600;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        color: var(--muted);
+        margin-bottom: 8px;
+      }
 
-    /* ── Section label ── */
-    .label {
-      font-size: 11px;
-      font-weight: 600;
-      letter-spacing: .8px;
-      text-transform: uppercase;
-      color: var(--muted);
-      margin-bottom: 8px;
-    }
+      /* ── Day grid ── */
+      .days-grid {
+        display: grid;
+        grid-template-columns: repeat(7, 1fr);
+        gap: 5px;
+        margin-bottom: 18px;
+      }
 
-    /* ── Day grid ── */
-    .days-grid {
-      display: grid;
-      grid-template-columns: repeat(7, 1fr);
-      gap: 5px;
-      margin-bottom: 18px;
-    }
+      .day-btn {
+        aspect-ratio: 1;
+        border: 1px solid var(--border);
+        background: var(--surface);
+        color: var(--muted);
+        border-radius: 7px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 11px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s ease;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
 
-    .day-btn {
-      aspect-ratio: 1;
-      border: 1px solid var(--border);
-      background: var(--surface);
-      color: var(--muted);
-      border-radius: 7px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 11px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .15s ease;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-    }
+      .day-btn:hover {
+        border-color: var(--accent);
+        color: var(--text);
+      }
 
-    .day-btn:hover {
-      border-color: var(--accent);
-      color: var(--text);
-    }
+      .day-btn.active {
+        background: var(--accent-dim);
+        border-color: var(--accent);
+        color: var(--accent);
+        font-weight: 600;
+      }
 
-    .day-btn.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-      color: var(--accent);
-      font-weight: 600;
-    }
+      .day-btn.today {
+        position: relative;
+      }
 
-    .day-btn.today {
-      position: relative;
-    }
+      .day-btn.today::after {
+        content: "";
+        position: absolute;
+        bottom: 3px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 4px;
+        height: 4px;
+        border-radius: 50%;
+        background: var(--accent);
+      }
 
-    .day-btn.today::after {
-      content: '';
-      position: absolute;
-      bottom: 3px;
-      left: 50%;
-      transform: translateX(-50%);
-      width: 4px;
-      height: 4px;
-      border-radius: 50%;
-      background: var(--accent);
-    }
+      /* ── Time row ── */
+      .time-row {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 18px;
+      }
 
-    /* ── Time row ── */
-    .time-row {
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      margin-bottom: 18px;
-    }
+      .time-row label {
+        flex: 1;
+        color: var(--muted);
+        font-size: 12px;
+      }
 
-    .time-row label {
-      flex: 1;
-      color: var(--muted);
-      font-size: 12px;
-    }
+      .time-row input[type="time"] {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: 7px;
+        color: var(--text);
+        font-family: "DM Mono", monospace;
+        font-size: 13px;
+        padding: 6px 10px;
+        outline: none;
+        transition: border-color 0.15s;
+      }
 
-    .time-row input[type="time"] {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 7px;
-      color: var(--text);
-      font-family: 'DM Mono', monospace;
-      font-size: 13px;
-      padding: 6px 10px;
-      outline: none;
-      transition: border-color .15s;
-    }
+      .time-row input[type="time"]:focus {
+        border-color: var(--accent);
+      }
 
-    .time-row input[type="time"]:focus {
-      border-color: var(--accent);
-    }
+      .time-row input[type="time"]::-webkit-calendar-picker-indicator {
+        filter: invert(60%) sepia(100%) saturate(300%) hue-rotate(200deg);
+        cursor: pointer;
+      }
 
-    .time-row input[type="time"]::-webkit-calendar-picker-indicator {
-      filter: invert(60%) sepia(100%) saturate(300%) hue-rotate(200deg);
-      cursor: pointer;
-    }
+      /* ── Week type toggle ── */
+      .week-toggle {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 6px;
+        margin-bottom: 18px;
+      }
 
-    /* ── Week type toggle ── */
-    .week-toggle {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 6px;
-      margin-bottom: 18px;
-    }
+      .week-opt {
+        border: 1px solid var(--border);
+        background: var(--surface);
+        border-radius: var(--radius);
+        padding: 9px 8px;
+        cursor: pointer;
+        transition: all 0.15s;
+        text-align: center;
+      }
 
-    .week-opt {
-      border: 1px solid var(--border);
-      background: var(--surface);
-      border-radius: var(--radius);
-      padding: 9px 8px;
-      cursor: pointer;
-      transition: all .15s;
-      text-align: center;
-    }
+      .week-opt:hover {
+        border-color: var(--accent);
+      }
 
-    .week-opt:hover {
-      border-color: var(--accent);
-    }
+      .week-opt.active {
+        background: var(--accent-dim);
+        border-color: var(--accent);
+      }
 
-    .week-opt.active {
-      background: var(--accent-dim);
-      border-color: var(--accent);
-    }
+      .week-opt .wlabel {
+        font-size: 11px;
+        font-weight: 600;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        margin-bottom: 4px;
+      }
 
-    .week-opt .wlabel {
-      font-size: 11px;
-      font-weight: 600;
-      color: var(--muted);
-      text-transform: uppercase;
-      letter-spacing: .5px;
-      margin-bottom: 4px;
-    }
+      .week-opt.active .wlabel {
+        color: var(--accent);
+      }
 
-    .week-opt.active .wlabel {
-      color: var(--accent);
-    }
+      .week-opt .wdays {
+        font-size: 13px;
+        font-weight: 600;
+        color: var(--text);
+      }
 
-    .week-opt .wdays {
-      font-size: 13px;
-      font-weight: 600;
-      color: var(--text);
-    }
+      .week-opt .wdays .day-chip {
+        display: inline-block;
+        background: var(--border);
+        border-radius: 4px;
+        padding: 1px 5px;
+        font-size: 11px;
+        margin: 0 1px;
+      }
 
-    .week-opt .wdays .day-chip {
-      display: inline-block;
-      background: var(--border);
-      border-radius: 4px;
-      padding: 1px 5px;
-      font-size: 11px;
-      margin: 0 1px;
-    }
+      .week-opt.active .wdays .day-chip {
+        background: var(--accent);
+        color: #fff;
+      }
 
-    .week-opt.active .wdays .day-chip {
-      background: var(--accent);
-      color: #fff;
-    }
+      /* ── Next week preview ── */
+      .next-week-info {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        padding: 9px 12px;
+        margin-bottom: 18px;
+        font-size: 11px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
 
-    /* ── Next week preview ── */
-    .next-week-info {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: var(--radius);
-      padding: 9px 12px;
-      margin-bottom: 18px;
-      font-size: 11px;
-      color: var(--muted);
-      display: flex;
-      align-items: center;
-      gap: 7px;
-    }
+      .next-week-info .arrow {
+        color: var(--amber);
+        font-size: 13px;
+      }
 
-    .next-week-info .arrow {
-      color: var(--amber);
-      font-size: 13px;
-    }
+      .next-week-info strong {
+        color: var(--amber);
+      }
 
-    .next-week-info strong {
-      color: var(--amber);
-    }
+      /* ── Buttons ── */
+      .btn-row {
+        display: flex;
+        gap: 8px;
+      }
 
-    /* ── Buttons ── */
-    .btn-row {
-      display: flex;
-      gap: 8px;
-    }
+      button.primary,
+      button.secondary {
+        flex: 1;
+        border: none;
+        border-radius: var(--radius);
+        padding: 10px;
+        font-family: "DM Sans", sans-serif;
+        font-size: 13px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
 
-    button.primary,
-    button.secondary {
-      flex: 1;
-      border: none;
-      border-radius: var(--radius);
-      padding: 10px;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 13px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all .15s;
-    }
+      button.primary {
+        background: var(--accent);
+        color: #fff;
+      }
 
-    button.primary {
-      background: var(--accent);
-      color: #fff;
-    }
+      button.primary:hover {
+        filter: brightness(1.15);
+      }
 
-    button.primary:hover {
-      filter: brightness(1.15);
-    }
+      button.primary:active {
+        filter: brightness(0.9);
+      }
 
-    button.primary:active {
-      filter: brightness(0.9);
-    }
+      button.secondary {
+        background: var(--surface);
+        border: 1px solid var(--border);
+        color: var(--muted);
+      }
 
-    button.secondary {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      color: var(--muted);
-    }
+      button.secondary:hover {
+        border-color: var(--danger);
+        color: var(--danger);
+      }
 
-    button.secondary:hover {
-      border-color: var(--danger);
-      color: var(--danger);
-    }
+      /* ── Open link button ── */
+      .open-btn {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 6px;
+        width: 100%;
+        margin-top: 12px;
+        padding: 9px;
+        background: none;
+        border: 1px dashed var(--border);
+        border-radius: var(--radius);
+        color: var(--muted);
+        font-family: "DM Sans", sans-serif;
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
 
-    /* ── Open link button ── */
-    .open-btn {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 6px;
-      width: 100%;
-      margin-top: 12px;
-      padding: 9px;
-      background: none;
-      border: 1px dashed var(--border);
-      border-radius: var(--radius);
-      color: var(--muted);
-      font-family: 'DM Sans', sans-serif;
-      font-size: 12px;
-      cursor: pointer;
-      transition: all .15s;
-    }
+      .open-btn:hover {
+        border-color: var(--accent);
+        color: var(--accent);
+      }
 
-    .open-btn:hover {
-      border-color: var(--accent);
-      color: var(--accent);
-    }
+      /* ── Toast ── */
+      .toast {
+        position: fixed;
+        bottom: 14px;
+        left: 50%;
+        transform: translateX(-50%) translateY(20px);
+        background: var(--success);
+        color: #0a1a12;
+        font-size: 12px;
+        font-weight: 600;
+        padding: 7px 16px;
+        border-radius: 20px;
+        opacity: 0;
+        transition: all 0.25s ease;
+        pointer-events: none;
+        white-space: nowrap;
+      }
 
-    /* ── Toast ── */
-    .toast {
-      position: fixed;
-      bottom: 14px;
-      left: 50%;
-      transform: translateX(-50%) translateY(20px);
-      background: var(--success);
-      color: #0a1a12;
-      font-size: 12px;
-      font-weight: 600;
-      padding: 7px 16px;
-      border-radius: 20px;
-      opacity: 0;
-      transition: all .25s ease;
-      pointer-events: none;
-      white-space: nowrap;
-    }
+      .toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(0);
+      }
 
-    .toast.show {
-      opacity: 1;
-      transform: translateX(-50%) translateY(0);
-    }
+      /* ── Divider ── */
+      .divider {
+        height: 1px;
+        background: var(--border);
+        margin: 16px 0;
+      }
 
-    /* ── Divider ── */
-    .divider {
-      height: 1px;
-      background: var(--border);
-      margin: 16px 0;
-    }
-  </style>
-</head>
+      .date-info {
+        font-size: 12px;
+        color: #a0aec0;
+        margin: 6px 0;
+        line-height: 1.5;
+      }
 
-<body>
+      .date-info strong {
+        color: #e2e8f0;
+      }
+    </style>
+  </head>
 
-  <div class="header">
-    <div class="logo">📋</div>
-    <div class="header-text">
-      <h1>COIG Przypomnienie</h1>
-      <p>Wniosek o pracę zdalną</p>
-    </div>
-  </div>
-
-  <div class="status">
-    <div class="dot" id="dot"></div>
-    <span id="statusText">Ładowanie…</span>
-  </div>
-
-  <div class="label">Dzień przypomnienia</div>
-  <div class="days-grid" id="daysGrid"></div>
-
-  <div class="label">Godzina powiadomienia</div>
-  <div class="time-row">
-    <label>Wyślij o godzinie:</label>
-    <input type="time" id="notifyTime" value="09:00" />
-  </div>
-
-  <div class="label">Typ następnego tygodnia</div>
-  <div class="week-toggle">
-    <div class="week-opt active" id="optStandard" data-type="standard">
-      <div class="wlabel">Standardowy</div>
-      <div class="wdays">
-        <span class="day-chip">Śr</span><span class="day-chip">Cz</span>
+  <body>
+    <div class="header">
+      <div class="logo">📋</div>
+      <div class="header-text">
+        <h1>DEV - COIG Przypomnienie</h1>
+        <p>Wniosek o pracę zdalną</p>
       </div>
     </div>
-    <div class="week-opt" id="optFriday" data-type="friday">
-      <div class="wlabel">Z piątkiem</div>
-      <div class="wdays">
-        <span class="day-chip">Cz</span><span class="day-chip">Pt</span>
+
+    <div class="status">
+      <div class="dot" id="dot"></div>
+      <span id="statusText">Ładowanie…</span>
+    </div>
+
+    <div class="label">Dzień przypomnienia</div>
+    <div class="days-grid" id="daysGrid"></div>
+
+    <div class="label">Godzina powiadomienia</div>
+    <div class="time-row">
+      <label>Wyślij o godzinie:</label>
+      <input type="time" id="notifyTime" value="09:00" />
+    </div>
+
+    <div class="label">Typ następnego tygodnia</div>
+    <div class="week-toggle">
+      <div class="week-opt active" id="optStandard" data-type="standard">
+        <div class="wlabel">Standardowy</div>
+        <div class="wdays">
+          <span class="day-chip">Śr</span><span class="day-chip">Cz</span>
+        </div>
+      </div>
+      <div class="week-opt" id="optFriday" data-type="friday">
+        <div class="wlabel">Z piątkiem</div>
+        <div class="wdays">
+          <span class="day-chip">Cz</span><span class="day-chip">Pt</span>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="next-week-info" id="nextWeekInfo">
-    <span class="arrow">↻</span>
-    <span id="nextWeekText">Po przypomnieniu automatycznie przełączy się na: <strong>—</strong></span>
-  </div>
+    <div class="next-week-info" id="nextWeekInfo">
+      <span class="arrow">↻</span>
+      <span id="nextWeekText"
+        >Po przypomnieniu automatycznie przełączy się na:
+        <strong>—</strong></span
+      >
+    </div>
 
-  <div class="btn-row">
-    <button class="primary" id="saveBtn">Zapisz</button>
-    <button class="secondary" id="disableBtn">Wyłącz</button>
-  </div>
+    <div id="dateInfo" class="date-info"></div>
 
-  <button class="open-btn" id="openBtn">
-    ↗ Otwórz formularz COIG
-  </button>
+    <div class="btn-row">
+      <button class="primary" id="saveBtn">Zapisz</button>
+      <button class="secondary" id="disableBtn">Wyłącz</button>
+    </div>
 
-  <div class="toast" id="toast"></div>
+    <button class="open-btn" id="openBtn">↗ Otwórz formularz COIG</button>
 
-  <script src="popup.js"></script>
-</body>
+    <div class="toast" id="toast"></div>
 
+    <script src="popup.js"></script>
+  </body>
 </html>

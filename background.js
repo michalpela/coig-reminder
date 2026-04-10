@@ -6,14 +6,16 @@ const ALARM_NAME = "coig-reminder-alarm";
 // Treści dla każdego typu tygodnia
 const WEEK_TYPES = {
   standard: {
-    days: "środę i czwartek",
+    days: "środa i czwartek",
     short: "Śr + Cz",
     next: "friday",
+    remote: [0, 1, 4], // Pn, Wt, Pt
   },
   friday: {
     days: "czwartek i piątek",
     short: "Cz + Pt",
     next: "standard",
+    remote: [0, 1, 2], //Pn, Wt, Śr,
   },
 };
 
@@ -43,7 +45,7 @@ function reschedule() {
         chrome.alarms.create(ALARM_NAME, { when });
         console.log("[COIG] Alarm zaplanowany na:", new Date(when).toString());
       });
-    }
+    },
   );
 }
 
@@ -59,7 +61,10 @@ function nextOccurrence(targetDay, timeStr) {
     candidate.setDate(now.getDate() + offset);
     candidate.setHours(hh, mm, 0, 0);
 
-    if (candidate.getDay() === targetDay && candidate.getTime() > Date.now() + 60_000) {
+    if (
+      candidate.getDay() === targetDay &&
+      candidate.getTime() > Date.now() + 60_000
+    ) {
       return candidate.getTime();
     }
   }
@@ -82,7 +87,12 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 /* ── Sprawdź i wyślij powiadomienie ─────────────────────────── */
 function checkAndNotify() {
   chrome.storage.sync.get(
-    { selectedDay: null, lastNotified: null, notifyTime: "09:00", nextWeekType: "standard" },
+    {
+      selectedDay: null,
+      lastNotified: null,
+      notifyTime: "09:00",
+      nextWeekType: "standard",
+    },
     (data) => {
       if (data.selectedDay === null || data.selectedDay === -1) return;
 
@@ -91,27 +101,55 @@ function checkAndNotify() {
       const todayDate = now.toDateString();
 
       if (todayDay !== data.selectedDay) return;
-      if (data.lastNotified === todayDate) return;   // już wysłane dziś
+      if (data.lastNotified === todayDate) return; // już wysłane dziś
 
       const weekType = data.nextWeekType || "standard";
       sendNotification(todayDate, weekType);
-    }
+    },
   );
+}
+
+// Oblicza konkretne daty (dzień i miesiąc) dla wniosku na przyszły tydzień.
+function getRemoteDatesFormatted(weekType) {
+  const now = new Date();
+  const today = now.getDay();
+
+  const daysToNextMonday = today === 0 ? 1 : 8 - today;
+  const nextMonday = new Date(now);
+  nextMonday.setDate(now.getDate() + daysToNextMonday);
+
+  const offsets = WEEK_TYPES[weekType].remote;
+
+  const dates = offsets.map((offset) => {
+    const d = new Date(nextMonday);
+    d.setDate(nextMonday.getDate() + offset);
+    return d;
+  });
+
+  const fmt = { day: "numeric", month: "long" };
+
+  const day1 = dates[0].getDate();
+  const day2 = dates[1].getDate();
+  const day3Full = dates[2].toLocaleDateString("pl-PL", fmt);
+
+  return `${day1}, ${day2}, ${day3Full}`;
 }
 
 function sendNotification(todayDate, weekType) {
   const wt = WEEK_TYPES[weekType] || WEEK_TYPES.standard;
   const nextType = oppositeType(weekType);
-  const nextWt = WEEK_TYPES[nextType];
+  // const nextWt = WEEK_TYPES[nextType];
+
+  const specificDates = getRemoteDatesFormatted(weekType);
 
   chrome.notifications.create("coig-reminder", {
     type: "basic",
     iconUrl: "icons/icon128.png",
     title: "📋 Czas na wniosek o pracę!",
-    message: `Wypełnij wniosek na ${wt.days}. \nNastępny tydzień: ${nextWt.short}.`,
+    message: `Dni w biurze: ${wt.days}.\nWypełnij wniosek na:\n${specificDates}.`,
     priority: 2,
     requireInteraction: true,
-    buttons: [{ title: "Otwórz formularz" }]
+    buttons: [{ title: "Otwórz formularz" }],
   });
 
   // Zapisz: powiadomiono dziś + przełącz typ na następny tydzień
