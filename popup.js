@@ -14,7 +14,7 @@ const WEEK_TYPES = {
   friday: {
     label: "Z piątkiem",
     days: "Poniedziałek i Piątek",
-    short: "Wt + Pt",
+    short: "Pn + Pt",
     remote: [1, 2, 3], //Wt, Śr, Cz
   },
 };
